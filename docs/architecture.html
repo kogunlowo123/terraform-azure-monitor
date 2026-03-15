@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture -- terraform-azure-monitor</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0c0b;color:#f5f2eb;font-family:'SF Mono','Cascadia Code','Fira Code',monospace;line-height:1.7;padding:0}
+a{color:#c8420a;text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:1200px;margin:0 auto;padding:2rem}
+h1,h2,h3{color:#f5f2eb;margin-bottom:1rem}
+h1{font-size:2rem;border-bottom:3px solid #c8420a;padding-bottom:.5rem;margin-bottom:2rem}
+h2{font-size:1.4rem;border-bottom:1px solid #333;padding-bottom:.4rem;margin-top:2.5rem}
+h3{font-size:1.1rem;color:#c8420a}
+.badge{display:inline-block;background:#0078d4;color:#fff;padding:4px 14px;border-radius:4px;font-size:.75rem;font-weight:700;margin-right:8px;letter-spacing:.5px}
+.badge-accent{background:#c8420a}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1.5rem 0}
+.card{background:#161816;border:1px solid #222;border-radius:8px;padding:1.2rem}
+.card h3{margin-bottom:.5rem;font-size:.95rem}
+.card p{font-size:.82rem;color:#bbb}
+.card .num{font-size:1.8rem;color:#c8420a;font-weight:700}
+.arch-diagram{background:#121312;border:1px solid #333;border-radius:8px;padding:2rem;margin:1.5rem 0;overflow-x:auto}
+.box{background:#1a1b1a;border:2px solid #c8420a;border-radius:6px;padding:.7rem 1.2rem;text-align:center;font-size:.8rem;min-width:110px;display:inline-block}
+.box.blue{border-color:#0078d4;color:#7ec8f0}
+.box.green{border-color:#3f8624;color:#7fba00}
+.box.red{border-color:#dd344c;color:#ff6b7a}
+.box.purple{border-color:#8c4fff;color:#b4a0ff}
+.box.orange{border-color:#ff9900;color:#ffb84d}
+.arrow{color:#555;font-size:1.2rem}
+.table-wrap{overflow-x:auto;margin:1rem 0}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{background:#1a1b1a;color:#c8420a;text-align:left;padding:.6rem .8rem;border-bottom:2px solid #333}
+td{padding:.5rem .8rem;border-bottom:1px solid #1e1f1e}
+tr:hover td{background:#161816}
+.checklist{list-style:none;padding:0}
+.checklist li{padding:.4rem 0;font-size:.85rem}
+.checklist li::before{content:"[ ] ";color:#c8420a;font-weight:700}
+.checklist li.done::before{content:"[x] ";color:#3f8624}
+code{background:#1a1b1a;padding:2px 6px;border-radius:3px;font-size:.82rem}
+pre{background:#121312;border:1px solid #333;border-radius:6px;padding:1rem;overflow-x:auto;font-size:.8rem;margin:1rem 0}
+.section{margin:2rem 0}
+.footer{border-top:1px solid #333;padding-top:1.5rem;margin-top:3rem;text-align:center;font-size:.75rem;color:#666}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media(max-width:768px){.grid-2{grid-template-columns:1fr}}
+.flow-row{display:flex;align-items:center;justify-content:center;gap:.4rem;margin:.5rem 0;flex-wrap:wrap}
+.flow-col{display:flex;flex-direction:column;align-items:center;gap:.4rem}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div style="margin-bottom:1rem">
+<span class="badge">Microsoft Azure</span>
+<span class="badge badge-accent">Terraform Module</span>
+<span class="badge" style="background:#333">v1.0</span>
+</div>
+
+<h1>terraform-azure-monitor</h1>
+
+<div class="section">
+<h2>Executive Summary</h2>
+<p>Comprehensive Terraform module for deploying Azure Monitor infrastructure including Log Analytics workspace, Application Insights, action groups (email/SMS/webhook/Logic App/Azure Function), metric alerts, log-based scheduled query alerts, activity log alerts, diagnostic settings for any Azure resource, and data collection rules for VM telemetry. Provides a complete observability platform for enterprise Azure environments.</p>
+</div>
+
+<div class="section">
+<h2>Overview</h2>
+<div class="cards">
+<div class="card"><div class="num">9</div><h3>Resource Types</h3><p>Log Analytics, App Insights, Action Groups, Alerts, Diagnostics, DCRs</p></div>
+<div class="card"><div class="num">22</div><h3>Variables</h3><p>Configurable input parameters</p></div>
+<div class="card"><div class="num">16</div><h3>Outputs</h3><p>IDs, keys, connection strings</p></div>
+<div class="card"><div class="num">3</div><h3>Examples</h3><p>Basic, Advanced, Complete</p></div>
+</div>
+</div>
+
+<div class="section">
+<h2>Architecture Diagram</h2>
+<div class="arch-diagram">
+<div class="flow-col">
+<div class="flow-row">
+<div style="border:2px solid #0078d4;border-radius:8px;padding:1rem;margin:.3rem">
+<div style="color:#7ec8f0;font-weight:700;text-align:center;margin-bottom:.5rem">Data Platform</div>
+<div class="flow-row">
+<div class="box blue">Log Analytics<br>Workspace</div>
+<div class="box purple">Application<br>Insights</div>
+<div class="box blue">Solutions<br><small>Security / Container</small></div>
+</div>
+</div>
+</div>
+<div class="arrow" style="display:block;text-align:center">|</div>
+<div class="flow-row">
+<div style="border:2px solid #dd344c;border-radius:8px;padding:1rem;margin:.3rem">
+<div style="color:#ff6b7a;font-weight:700;text-align:center;margin-bottom:.5rem">Alert Rules</div>
+<div class="flow-row">
+<div class="box red">Metric Alerts</div>
+<div class="box red">Log Alerts<br><small>KQL Queries</small></div>
+<div class="box red">Activity Log<br>Alerts</div>
+</div>
+</div>
+<div class="arrow">&rarr;</div>
+<div style="border:2px solid #ff9900;border-radius:8px;padding:1rem;margin:.3rem">
+<div style="color:#ffb84d;font-weight:700;text-align:center;margin-bottom:.5rem">Action Groups</div>
+<div class="flow-row">
+<div class="box orange">Email / SMS</div>
+<div class="box orange">Webhook</div>
+<div class="box orange">Logic App /<br>Azure Function</div>
+</div>
+</div>
+</div>
+<div class="arrow" style="display:block;text-align:center">^</div>
+<div class="flow-row">
+<div style="border:2px solid #3f8624;border-radius:8px;padding:1rem;margin:.3rem">
+<div style="color:#7fba00;font-weight:700;text-align:center;margin-bottom:.5rem">Data Collection</div>
+<div class="flow-row">
+<div class="box green">Diagnostic<br>Settings</div>
+<div class="box green">Data Collection<br>Rules</div>
+</div>
+</div>
+<div class="arrow">&larr;</div>
+<div style="border:2px solid #0078d4;border-radius:8px;padding:1rem;margin:.3rem">
+<div style="color:#7ec8f0;font-weight:700;text-align:center;margin-bottom:.5rem">Monitored Resources</div>
+<div class="flow-row">
+<div class="box blue">Key Vault</div>
+<div class="box blue">Storage</div>
+<div class="box blue">VMs</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>Component Breakdown</h2>
+<div class="table-wrap">
+<table>
+<tr><th>Resource</th><th>Purpose</th></tr>
+<tr><td><code>azurerm_log_analytics_workspace</code></td><td>Central log store with configurable SKU, retention, and daily quota</td></tr>
+<tr><td><code>azurerm_log_analytics_solution</code></td><td>Installable solutions (SecurityInsights, ContainerInsights)</td></tr>
+<tr><td><code>azurerm_application_insights</code></td><td>APM for web apps with sampling and data caps</td></tr>
+<tr><td><code>azurerm_monitor_action_group</code></td><td>Notification channels: email, SMS, webhook, Logic App, Azure Function, ARM role</td></tr>
+<tr><td><code>azurerm_monitor_metric_alert</code></td><td>Static and dynamic threshold metric alerts with dimensions</td></tr>
+<tr><td><code>azurerm_monitor_scheduled_query_rules_alert_v2</code></td><td>KQL-based log alerts with failing period evaluation</td></tr>
+<tr><td><code>azurerm_monitor_activity_log_alert</code></td><td>Service health, resource health, and administrative alerts</td></tr>
+<tr><td><code>azurerm_monitor_diagnostic_setting</code></td><td>Log/metric routing to Log Analytics, Storage, Event Hub</td></tr>
+<tr><td><code>azurerm_monitor_data_collection_rule</code></td><td>VM telemetry collection (perf counters, syslog, Windows events)</td></tr>
+</table>
+</div>
+</div>
+
+<div class="section">
+<h2>Data Flow</h2>
+<div class="arch-diagram">
+<div class="flow-row">
+<div class="box blue">Azure Resources</div>
+<div class="arrow">&rarr;</div>
+<div class="box green">Diagnostic Settings / DCRs</div>
+<div class="arrow">&rarr;</div>
+<div class="box blue">Log Analytics Workspace</div>
+<div class="arrow">&rarr;</div>
+<div class="box red">Alert Rules (Metric/Log/Activity)</div>
+<div class="arrow">&rarr;</div>
+<div class="box orange">Action Groups</div>
+<div class="arrow">&rarr;</div>
+<div class="box purple">Notifications</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>Security Controls</h2>
+<div class="grid-2">
+<div class="card">
+<h3>Data Protection</h3>
+<p>- Configurable data retention (30-730 days)<br>- Daily ingestion quotas<br>- Internet ingestion/query toggle<br>- Sensitive output masking (keys, connection strings)</p>
+</div>
+<div class="card">
+<h3>Alerting</h3>
+<p>- Service health alerts for outages<br>- Resource health monitoring<br>- Administrative activity tracking<br>- Auto-mitigation for alert recovery<br>- Common alert schema for standardization</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>Industry Adaptation</h2>
+<div class="cards">
+<div class="card"><h3>SaaS Platforms</h3><p>Application Insights with sampling, custom metric alerts per service, webhook integrations for PagerDuty/Slack</p></div>
+<div class="card"><h3>Financial Services</h3><p>730-day retention, activity log alerts for policy changes, service health monitoring, Log Analytics solutions for security</p></div>
+<div class="card"><h3>Healthcare</h3><p>HIPAA-compliant logging, data collection rules for VM monitoring, resource health alerts for critical systems</p></div>
+<div class="card"><h3>E-Commerce</h3><p>Dynamic threshold alerts for auto-scaling signals, Application Insights for transaction tracing, Logic App alert workflows</p></div>
+</div>
+</div>
+
+<div class="section">
+<h2>Production Readiness Checklist</h2>
+<ul class="checklist">
+<li class="done">Log Analytics workspace with appropriate retention</li>
+<li class="done">Action groups configured for critical, warning, informational</li>
+<li class="done">Service health alerts active</li>
+<li class="done">Diagnostic settings for all critical resources</li>
+<li>Configure metric alerts for CPU, memory, disk, latency</li>
+<li>Set up log alerts for error patterns</li>
+<li>Enable Application Insights for web applications</li>
+<li>Deploy data collection rules for VMs</li>
+<li>Configure daily quota limits for cost control</li>
+<li>Test alert notification delivery</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>Configuration Reference</h2>
+<div class="table-wrap">
+<table>
+<tr><th>Variable</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>create_log_analytics_workspace</code></td><td>bool</td><td>true</td><td>Create Log Analytics workspace</td></tr>
+<tr><td><code>log_analytics_retention_days</code></td><td>number</td><td>30</td><td>Retention (30-730 days)</td></tr>
+<tr><td><code>log_analytics_daily_quota_gb</code></td><td>number</td><td>-1</td><td>Daily quota (-1 = unlimited)</td></tr>
+<tr><td><code>create_application_insights</code></td><td>bool</td><td>false</td><td>Create App Insights resource</td></tr>
+<tr><td><code>action_groups</code></td><td>map(object)</td><td>{}</td><td>Notification action groups</td></tr>
+<tr><td><code>metric_alerts</code></td><td>map(object)</td><td>{}</td><td>Metric-based alert rules</td></tr>
+<tr><td><code>log_alerts</code></td><td>map(object)</td><td>{}</td><td>KQL query-based alerts</td></tr>
+<tr><td><code>activity_log_alerts</code></td><td>map(object)</td><td>{}</td><td>Activity log alert rules</td></tr>
+<tr><td><code>diagnostic_settings</code></td><td>map(object)</td><td>{}</td><td>Resource diagnostic settings</td></tr>
+<tr><td><code>data_collection_rules</code></td><td>map(object)</td><td>{}</td><td>VM data collection rules</td></tr>
+</table>
+</div>
+</div>
+
+<div class="section">
+<h2>Deployment</h2>
+<pre>
+terraform init
+terraform plan -var-file="monitor.tfvars"
+terraform apply -var-file="monitor.tfvars"
+
+# Verify workspace
+az monitor log-analytics workspace show --workspace-name log-prod-001 --resource-group rg-monitor
+</pre>
+</div>
+
+<div class="section">
+<h2>Links</h2>
+<p>
+<a href="https://learn.microsoft.com/en-us/azure/azure-monitor/">Azure Monitor Documentation</a> |
+<a href="https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-overview">Log Analytics</a> |
+<a href="../examples/basic/main.tf">Basic Example</a> |
+<a href="../examples/complete/main.tf">Complete Example</a>
+</p>
+</div>
+
+<div class="footer">
+<p>terraform-azure-monitor &mdash; Architecture Document</p>
+<p>Generated on 2026-03-15 &bull; Terraform &ge; 1.5.0 &bull; AzureRM &ge; 3.80.0</p>
+<p style="margin-top:.5rem"><span class="badge">Microsoft Azure</span> Verified Module Architecture</p>
+</div>
+
+</div>
+</body>
+</html>
