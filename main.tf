@@ -1,24 +1,18 @@
-###############################################################################
-# Log Analytics Workspace
-###############################################################################
 resource "azurerm_log_analytics_workspace" "this" {
   count = var.create_log_analytics_workspace ? 1 : 0
 
-  name                               = local.log_analytics_workspace_name
-  location                           = var.location
-  resource_group_name                = var.resource_group_name
-  sku                                = var.log_analytics_sku
-  retention_in_days                  = var.log_analytics_retention_days
-  daily_quota_gb                     = var.log_analytics_daily_quota_gb
-  internet_ingestion_enabled         = var.log_analytics_internet_ingestion_enabled
-  internet_query_enabled             = var.log_analytics_internet_query_enabled
+  name                       = var.log_analytics_workspace_name != "" ? var.log_analytics_workspace_name : "log-monitor-${var.location}"
+  location                   = var.location
+  resource_group_name        = var.resource_group_name
+  sku                        = var.log_analytics_sku
+  retention_in_days          = var.log_analytics_retention_days
+  daily_quota_gb             = var.log_analytics_daily_quota_gb
+  internet_ingestion_enabled = var.log_analytics_internet_ingestion_enabled
+  internet_query_enabled     = var.log_analytics_internet_query_enabled
 
-  tags = local.common_tags
+  tags = var.tags
 }
 
-###############################################################################
-# Log Analytics Solutions
-###############################################################################
 resource "azurerm_log_analytics_solution" "this" {
   for_each = var.create_log_analytics_workspace ? var.log_analytics_solutions : {}
 
@@ -34,16 +28,13 @@ resource "azurerm_log_analytics_solution" "this" {
   }
 }
 
-###############################################################################
-# Application Insights
-###############################################################################
 resource "azurerm_application_insights" "this" {
   count = var.create_application_insights ? 1 : 0
 
-  name                                  = local.application_insights_name
+  name                                  = var.application_insights_name != "" ? var.application_insights_name : "appi-monitor-${var.location}"
   location                              = var.location
   resource_group_name                   = var.resource_group_name
-  workspace_id                          = local.log_analytics_workspace_id
+  workspace_id                          = var.create_log_analytics_workspace ? azurerm_log_analytics_workspace.this[0].id : null
   application_type                      = var.application_insights_type
   daily_data_cap_in_gb                  = var.application_insights_daily_data_cap_gb
   daily_data_cap_notifications_disabled = var.application_insights_daily_data_cap_notifications_disabled
@@ -51,12 +42,9 @@ resource "azurerm_application_insights" "this" {
   sampling_percentage                   = var.application_insights_sampling_percentage
   disable_ip_masking                    = var.application_insights_disable_ip_masking
 
-  tags = local.common_tags
+  tags = var.tags
 }
 
-###############################################################################
-# Action Groups
-###############################################################################
 resource "azurerm_monitor_action_group" "this" {
   for_each = var.action_groups
 
@@ -130,12 +118,9 @@ resource "azurerm_monitor_action_group" "this" {
     }
   }
 
-  tags = merge(local.common_tags, each.value.tags)
+  tags = merge(var.tags, each.value.tags)
 }
 
-###############################################################################
-# Metric Alerts
-###############################################################################
 resource "azurerm_monitor_metric_alert" "this" {
   for_each = var.metric_alerts
 
@@ -202,12 +187,9 @@ resource "azurerm_monitor_metric_alert" "this" {
     }
   }
 
-  tags = merge(local.common_tags, each.value.tags)
+  tags = merge(var.tags, each.value.tags)
 }
 
-###############################################################################
-# Log Alerts (Scheduled Query Rules)
-###############################################################################
 resource "azurerm_monitor_scheduled_query_rules_alert_v2" "this" {
   for_each = var.log_alerts
 
@@ -258,12 +240,9 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "this" {
     }
   }
 
-  tags = merge(local.common_tags, each.value.tags)
+  tags = merge(var.tags, each.value.tags)
 }
 
-###############################################################################
-# Activity Log Alerts
-###############################################################################
 resource "azurerm_monitor_activity_log_alert" "this" {
   for_each = var.activity_log_alerts
 
@@ -309,18 +288,15 @@ resource "azurerm_monitor_activity_log_alert" "this" {
     }
   }
 
-  tags = merge(local.common_tags, each.value.tags)
+  tags = merge(var.tags, each.value.tags)
 }
 
-###############################################################################
-# Diagnostic Settings
-###############################################################################
 resource "azurerm_monitor_diagnostic_setting" "this" {
   for_each = var.diagnostic_settings
 
   name                           = each.key
   target_resource_id             = each.value.target_resource_id
-  log_analytics_workspace_id     = each.value.log_analytics_workspace_id != null ? each.value.log_analytics_workspace_id : local.log_analytics_workspace_id
+  log_analytics_workspace_id     = each.value.log_analytics_workspace_id != null ? each.value.log_analytics_workspace_id : (var.create_log_analytics_workspace ? azurerm_log_analytics_workspace.this[0].id : null)
   storage_account_id             = each.value.storage_account_id
   eventhub_authorization_rule_id = each.value.eventhub_authorization_rule_id
   eventhub_name                  = each.value.eventhub_name
@@ -344,9 +320,6 @@ resource "azurerm_monitor_diagnostic_setting" "this" {
   }
 }
 
-###############################################################################
-# Data Collection Rules
-###############################################################################
 resource "azurerm_monitor_data_collection_rule" "this" {
   for_each = var.data_collection_rules
 
@@ -415,5 +388,5 @@ resource "azurerm_monitor_data_collection_rule" "this" {
     }
   }
 
-  tags = merge(local.common_tags, each.value.tags)
+  tags = merge(var.tags, each.value.tags)
 }

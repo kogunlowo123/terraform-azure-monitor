@@ -13,9 +13,6 @@ variable "location" {
   type        = string
 }
 
-###############################################################################
-# Log Analytics Workspace
-###############################################################################
 variable "create_log_analytics_workspace" {
   description = "Whether to create a Log Analytics workspace."
   type        = bool
@@ -40,7 +37,7 @@ variable "log_analytics_sku" {
 }
 
 variable "log_analytics_retention_days" {
-  description = "Data retention in days for the Log Analytics workspace."
+  description = "Data retention in days for the Log Analytics workspace (30-730)."
   type        = number
   default     = 30
 
@@ -51,7 +48,7 @@ variable "log_analytics_retention_days" {
 }
 
 variable "log_analytics_daily_quota_gb" {
-  description = "Daily ingestion quota in GB. -1 means unlimited."
+  description = "Daily ingestion quota in GB (-1 means unlimited)."
   type        = number
   default     = -1
 }
@@ -77,9 +74,6 @@ variable "log_analytics_solutions" {
   default = {}
 }
 
-###############################################################################
-# Application Insights
-###############################################################################
 variable "create_application_insights" {
   description = "Whether to create an Application Insights resource."
   type        = bool
@@ -138,11 +132,8 @@ variable "application_insights_disable_ip_masking" {
   default     = false
 }
 
-###############################################################################
-# Action Groups
-###############################################################################
 variable "action_groups" {
-  description = "Map of action groups."
+  description = "Map of monitor action groups to create."
   type = map(object({
     short_name = string
     enabled    = optional(bool, true)
@@ -196,22 +187,19 @@ variable "action_groups" {
   default = {}
 }
 
-###############################################################################
-# Metric Alerts
-###############################################################################
 variable "metric_alerts" {
-  description = "Map of metric alerts."
+  description = "Map of metric alerts to create."
   type = map(object({
-    description           = optional(string, "")
-    enabled               = optional(bool, true)
-    auto_mitigate         = optional(bool, true)
-    frequency             = optional(string, "PT5M")
-    severity              = optional(number, 3)
-    window_size           = optional(string, "PT15M")
-    target_resource_type  = optional(string, null)
+    description              = optional(string, "")
+    enabled                  = optional(bool, true)
+    auto_mitigate            = optional(bool, true)
+    frequency                = optional(string, "PT5M")
+    severity                 = optional(number, 3)
+    window_size              = optional(string, "PT15M")
+    target_resource_type     = optional(string, null)
     target_resource_location = optional(string, null)
-    scopes                = list(string)
-    action_group_names    = optional(list(string), [])
+    scopes                   = list(string)
+    action_group_names       = optional(list(string), [])
 
     criteria = optional(list(object({
       metric_namespace = string
@@ -252,19 +240,16 @@ variable "metric_alerts" {
   default = {}
 }
 
-###############################################################################
-# Log Alerts (Scheduled Query Rules)
-###############################################################################
 variable "log_alerts" {
-  description = "Map of scheduled query rule alerts."
+  description = "Map of scheduled query rule alerts to create."
   type = map(object({
-    description        = optional(string, "")
-    enabled            = optional(bool, true)
-    severity           = optional(number, 3)
+    description          = optional(string, "")
+    enabled              = optional(bool, true)
+    severity             = optional(number, 3)
     evaluation_frequency = optional(string, "PT5M")
-    window_duration    = optional(string, "PT15M")
-    scopes             = list(string)
-    action_group_names = optional(list(string), [])
+    window_duration      = optional(string, "PT15M")
+    scopes               = list(string)
+    action_group_names   = optional(list(string), [])
 
     criteria = object({
       query                   = string
@@ -295,11 +280,8 @@ variable "log_alerts" {
   default = {}
 }
 
-###############################################################################
-# Activity Log Alerts
-###############################################################################
 variable "activity_log_alerts" {
-  description = "Map of activity log alerts."
+  description = "Map of activity log alerts to create."
   type = map(object({
     description        = optional(string, "")
     enabled            = optional(bool, true)
@@ -334,19 +316,16 @@ variable "activity_log_alerts" {
   default = {}
 }
 
-###############################################################################
-# Diagnostic Settings
-###############################################################################
 variable "diagnostic_settings" {
-  description = "Map of diagnostic settings."
+  description = "Map of diagnostic settings to create."
   type = map(object({
-    target_resource_id                 = string
-    log_analytics_workspace_id         = optional(string, null)
-    storage_account_id                 = optional(string, null)
-    eventhub_authorization_rule_id     = optional(string, null)
-    eventhub_name                      = optional(string, null)
-    log_analytics_destination_type     = optional(string, null)
-    partner_solution_id                = optional(string, null)
+    target_resource_id             = string
+    log_analytics_workspace_id     = optional(string, null)
+    storage_account_id             = optional(string, null)
+    eventhub_authorization_rule_id = optional(string, null)
+    eventhub_name                  = optional(string, null)
+    log_analytics_destination_type = optional(string, null)
+    partner_solution_id            = optional(string, null)
 
     enabled_logs = optional(list(object({
       category       = optional(string, null)
@@ -361,11 +340,8 @@ variable "diagnostic_settings" {
   default = {}
 }
 
-###############################################################################
-# Data Collection Rules
-###############################################################################
 variable "data_collection_rules" {
-  description = "Map of data collection rules."
+  description = "Map of data collection rules to create."
   type = map(object({
     description = optional(string, "")
     kind        = optional(string, null)
@@ -395,8 +371,8 @@ variable "data_collection_rules" {
       })), [])
 
       windows_event_logs = optional(list(object({
-        name    = string
-        streams = list(string)
+        name           = string
+        streams        = list(string)
         x_path_queries = list(string)
       })), [])
 
