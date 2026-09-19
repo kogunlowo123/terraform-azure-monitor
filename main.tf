@@ -247,6 +247,7 @@ resource "azurerm_monitor_activity_log_alert" "this" {
   for_each = var.activity_log_alerts
 
   name                = each.key
+  location            = "global"
   resource_group_name = var.resource_group_name
   description         = each.value.description
   enabled             = each.value.enabled
