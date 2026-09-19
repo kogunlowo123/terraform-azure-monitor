@@ -54,9 +54,9 @@ module "monitor" {
   log_analytics_workspace_name = "log-advanced-001"
   log_analytics_retention_days = 60
 
-  create_application_insights   = true
-  application_insights_name     = "appi-advanced-001"
-  application_insights_type     = "web"
+  create_application_insights = true
+  application_insights_name   = "appi-advanced-001"
+  application_insights_type   = "web"
 
   action_groups = {
     "ag-critical" = {
@@ -82,11 +82,11 @@ module "monitor" {
 
   metric_alerts = {
     "alert-high-cpu" = {
-      description = "Alert when CPU exceeds 85%"
-      severity    = 2
-      frequency   = "PT5M"
-      window_size = "PT15M"
-      scopes      = [azurerm_linux_virtual_machine_scale_set.example.id]
+      description        = "Alert when CPU exceeds 85%"
+      severity           = 2
+      frequency          = "PT5M"
+      window_size        = "PT15M"
+      scopes             = [azurerm_linux_virtual_machine_scale_set.example.id]
       action_group_names = ["ag-critical"]
 
       criteria = [{
@@ -101,8 +101,8 @@ module "monitor" {
 
   activity_log_alerts = {
     "alert-service-health" = {
-      description = "Service health notification"
-      scopes      = [data.azurerm_subscription.current.id]
+      description        = "Service health notification"
+      scopes             = [data.azurerm_subscription.current.id]
       action_group_names = ["ag-critical"]
 
       criteria = {

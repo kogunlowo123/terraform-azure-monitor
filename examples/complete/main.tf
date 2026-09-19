@@ -48,12 +48,12 @@ module "monitor" {
     }
   }
 
-  create_application_insights                               = true
-  application_insights_name                                 = "appi-complete-001"
-  application_insights_type                                 = "web"
-  application_insights_daily_data_cap_gb                    = 5
-  application_insights_retention_days                       = 120
-  application_insights_sampling_percentage                  = 50
+  create_application_insights                                = true
+  application_insights_name                                  = "appi-complete-001"
+  application_insights_type                                  = "web"
+  application_insights_daily_data_cap_gb                     = 5
+  application_insights_retention_days                        = 120
+  application_insights_sampling_percentage                   = 50
   application_insights_daily_data_cap_notifications_disabled = false
 
   action_groups = {
